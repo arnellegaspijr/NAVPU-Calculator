@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NAVPU Calculator</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f8f9fa;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        background: #dc3545;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    main {
+        max-width: 500px;
+        margin: 2rem auto;
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    label {
+        display: block;
+        margin-top: 1rem;
+        font-weight: bold;
+    }
+    input {
+        width: 100%;
+        padding: 0.6rem;
+        margin-top: 0.4rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    button {
+        margin-top: 1.5rem;
+        width: 100%;
+        padding: 0.8rem;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #b52a36;
+    }
+    .results {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f1f1f1;
+        border-radius: 8px;
+    }
+    footer {
+        text-align: center;
+        padding: 1rem;
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 2rem;
+    }
+    footer a {
+        color: #dc3545;
+        text-decoration: none;
+    }
+</style>
+</head>
+<body>
+
+<header>NAVPU Calculator</header>
+
+<main>
+    <label>Starting NAVPU</label>
+    <input type="number" id="startNav" step="0.0001" placeholder="e.g. 1.2345">
+
+    <label>Starting Date</label>
+    <input type="date" id="startDate">
+
+    <label>Ending NAVPU</label>
+    <input type="number" id="endNav" step="0.0001" placeholder="e.g. 1.4567">
+
+    <label>Ending Date</label>
+    <input type="date" id="endDate">
+
+    <label>Actual AMC (%)</label>
+    <input type="number" id="actualAMC" step="0.01" value="5.59">
+
+    <label>Simulated AMC (%)</label>
+    <input type="number" id="customAMC" step="0.01" value="4.00">
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div class="results" id="results" style="display:none;"></div>
+</main>
+
+<footer>
+    Made by <strong>Arnel Legaspi Jr</strong> — 
+    <a href="https://linktr.ee/master.fa" target="_blank">linktr.ee/master.fa</a>
+</footer>
+
+<script>
+function calculate() {
+    const startNav = parseFloat(document.getElementById('startNav').value);
+    const endNav = parseFloat(document.getElementById('endNav').value);
+    const startDate = new Date(document.getElementById('startDate').value);
+    const endDate = new Date(document.getElementById('endDate').value);
+    const actualAMC = parseFloat(document.getElementById('actualAMC').value);
+    const customAMC = parseFloat(document.getElementById('customAMC').value);
+
+    if (isNaN(startNav) || isNaN(endNav) || !startDate || !endDate) {
+        alert("Please fill all fields correctly.");
+        return;
+    }
+
+    const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    if (days <= 0) {
+        alert("End date must be after start date.");
+        return;
+    }
+
+    const actualDailyRate = ((endNav / startNav) ** (1 / days) - 1) * 100;
+    const customDailyRate = actualDailyRate + ((actualAMC - customAMC) / 365);
+
+    const actualTotalChange = ((1 + actualDailyRate/100) ** days - 1) * 100;
+    const customTotalChange = ((1 + customDailyRate/100) ** days - 1) * 100;
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').innerHTML = `
+        <strong>Results for ${days} days:</strong><br><br>
+        <strong>Actual Daily Rate:</strong> ${actualDailyRate.toFixed(5)}%<br>
+        <strong>Actual Total Change:</strong> ${actualTotalChange.toFixed(2)}%<br><br>
+        <strong>Simulated Daily Rate (with ${customAMC}% AMC):</strong> ${customDailyRate.toFixed(5)}%<br>
+        <strong>Simulated Total Change:</strong> ${customTotalChange.toFixed(2)}%
+    `;
+}
+</script>
+
+</body>
+</html>
